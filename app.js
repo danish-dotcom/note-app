@@ -1,27 +1,53 @@
 const yargs = require('yargs')
 const chalk = require('chalk')
 
+const fs = require('fs')
+
+const JSONfile = "json-1.json"
+
 // add command
 yargs.command({
     command: "add",
     describe: "add a new note",
     builder: {
-        title: {    // asks for a --title and lists this stuff when it doesn't get it
-            describe: "Note title",   
+        name: {    // asks for a --title and lists this stuff when it doesn't get it
+            describe: "Name",
             demandOption: true, // it is a requirement
             type: 'string'  //must be a string, at least ""
         },
-        body: {
-            describe: "Note body",
+        age: {
+            describe: "Age",
             demandOption: true,
-            type: 'string'
+            type: 'number'
         }
     },
     handler: function (argv) {
-        let title = chalk.blue.underline("Title") + ": " + chalk.blue(argv.title)
-        let body = chalk.blue.underline("Body") + ": " + chalk.blue(argv.body)
-        let nextLine = "\n"
-        console.log(title + nextLine + body)
+        //  Initial Data
+        const buffer = fs.readFileSync(JSONfile)
+        const JSONdata = JSON.parse(buffer.toString())
+        const entryName = argv.name
+        const entryAge = argv.age
+
+        let duplicateExists = false;
+
+        // loop over existing array
+        for (let currName of Object.keys(JSONdata)) {
+            if (JSONdata[currName].name == entryName) {
+                duplicateExists = true;
+                break;
+            }
+        }
+        
+        console.log("duplicateExists --value: " + duplicateExists)
+
+        // if not duplicate name then add entry
+        if (!duplicateExists) {  
+            const objectLength = Object.keys(JSONdata).length
+            JSONdata[`Person ${objectLength + 1}`].name = entryName
+            JSONdata[`Person ${objectLength + 1}`].age = entryAge
+
+            console.log(JSONdata)
+        }
     }
 })
 
